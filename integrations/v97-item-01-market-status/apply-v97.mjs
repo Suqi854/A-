@@ -3,13 +3,13 @@ import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-const base = "962ed1b925bdb8c0cf0215e7231c835cde74af59";
+const base = process.argv[3];
 const expected = {
   "src/page.mjs": "339cd0cac4a878bd1494cb9045cf003c6bc5252aa94d2d0abd6b459d5429a031",
   "scripts/build.mjs": "18781df30d62a024b74f53fc12085d35acc69bb2888a335a963f365e2c09d7d1"
 };
 const target=process.argv[2];
-if(!target)throw Error('Pass the path of an isolated, verified v97 source checkout.');
+if(!target || !/^[0-9a-f]{40}$/i.test(base || ''))throw Error('Pass an isolated source checkout and its independently verified 40-character source commit.');
 const root=path.resolve(target),here=path.dirname(fileURLToPath(import.meta.url));
 const head=execFileSync('git',['-C',root,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
 if(head!==base)throw Error('Wrong source commit; no files changed.');
@@ -34,4 +34,4 @@ const build=once(files['scripts/build.mjs'],"copyFileSync('src/page.mjs','dist/s
 const newFiles=Object.fromEntries(Object.entries(additions).map(([dest,src])=>[dest,readFileSync(path.join(here,src))]));
 writeFileSync(path.join(root,'src/page.mjs'),page);writeFileSync(path.join(root,'scripts/build.mjs'),build);
 for(const [dest,data] of Object.entries(newFiles))writeFileSync(path.join(root,dest),data);
-console.log(JSON.stringify({base,changed_files:['src/page.mjs','scripts/build.mjs',...Object.keys(additions)],committed:false,pushed:false,deployed:false}));
+console.log(JSON.stringify({source_commit_verified:true,changed_files:['src/page.mjs','scripts/build.mjs',...Object.keys(additions)],committed:false,pushed:false,deployed:false}));

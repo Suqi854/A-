@@ -1,25 +1,13 @@
-# 4.0 第1项候选：市场状态卡片
+# 市场状态卡片
 
-**未接入线上，待用户验收。** 本目录仅包含总览左上角第一张卡片，不代表完整4.0工作台或正式插件版本。
+独立只读组件，使用 Shadow DOM 隔离样式。卡片尺寸337×103，图标48×48，窄屏宽度不超过容器。
 
-直接下载并打开 `preview.html`，无需安装、启动服务或联网。默认显示“未连接”；下拉框中的有效、未知、过期、失败及未连接均为显式合成测试夹具。仓库版本已剔除真实行情快照。
+- market-status-card.js：通过 element.setSnapshot(observation) 接收调用方数据。
+- preview.html：可直接打开的离线预览，默认未连接；状态选择使用明确标记的合成数据。
+- market-status-card.test.cjs：Node内置测试。
 
-卡片按设计参考的337×103像素制作，图标48×48像素。组件采用Shadow DOM隔离，保留原图的字体层次、留白与配色。参考图中的“震荡（样例）”只是设计对照；有效行情仍显示“待判定”，不根据样例生成市场判断。
+运行：node --test market-status-card.test.cjs
 
-## 文件
+最小输入包括 benchmark.source、source_timestamp、received_at 和 freshness。时效判断同时核对源时间与接收时间；最近时段快照明确标记为非实时。数据完整且有效时仍显示“待判定”，不由示例生成市场分类。
 
-- `market-status-card.js`：可移植的独立组件。
-- `preview.html`：只包含本次新增组件和显式测试状态的单文件预览；不包含设计原图或PDF裁剪图。
-- `market-status-card.test.cjs`：无需第三方依赖的Node测试。
-
-运行检查：
-
-```sh
-node --test market-status-card.test.cjs
-```
-
-后续接入原插件时，由现有手动读取动作向组件提供最小公开字段：`benchmark.source`、`source_timestamp`、`received_at`、`freshness`。组件调用为 `element.setSnapshot(observation)`；测试专用时钟与fixture标志只用于隔离测试。预览不请求行情，不启动刷新、后台、通知或账户写入。
-
-本项尚未取得Sites v97精确源码，因此没有修改或覆盖旧插件，没有改变MCP工具、schema、授权、云桥、账本或部署配置。独立预览通过不能代替线上宿主接入和用户验收。
-
-删除本候选目录即可移除本项；没有数据库迁移或持久化运行状态。用户验收前不推进第二项或下一页。
+组件不发起请求，不设置定时器，不持久化输入。预览不包含真实行情、原始设计图或运行环境信息。

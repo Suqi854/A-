@@ -25,8 +25,8 @@
 <body><main>
   <div class="eyebrow">A QUANT / 01 · MARKET STATUS</div>
   <h1>总览工作台 · 市场状态</h1>
-  <p class="intro">4.0第1项代码候选：仅显示市场状态卡片，尚未接入线上。</p>
-  <span class="scope">独立本地候选 · 尚未接入现有插件</span>
+  <p class="intro">市场状态卡片的独立离线预览，输入均为合成测试资料。</p>
+  <span class="scope">离线组件预览 · 不代表运行环境状态</span>
   <div class="toolbar"><label for="scenario">查看状态</label><select id="scenario">
     <option value="snapshot">未连接（默认）</option>
     <option value="valid">测试夹具 · 有效行情</option>
@@ -48,7 +48,7 @@
   </dl><p class="footnote">源时间为提供方报告的更新时间，不等于经核实的最后成交时间；盘后量额终版未核定。</p></section>
   <div class="boundary"><p>本预览不会连接行情接口，也不会自动刷新。当前不包含真实行情快照。</p>
     <p>有效行情也不自动得到市场环境结论；测试夹具不是实际行情。</p>
-    <p>本次仅交付一张只读卡片。未发布、未启用后台或通知、未读取或修改账户。</p></div>
+    <p>本预览只展示卡片状态；不执行发布、后台任务或账户操作。</p></div>
 </main>
 <script>
 (function (global) {
@@ -64,7 +64,8 @@
         || !Number.isFinite(ageLimit) || ageLimit <= 0) {
       return blank('unknown', '数据待核验', '来源或时间证据尚不完整');
     }
-    if (b.freshness.status === 'stale' || nowMs - received > ageLimit * 1000) {
+    if (b.freshness.status === 'latest_session' && nowMs - received <= ageLimit * 1000) return blank('latest_session', '最近时段快照', '非实时，环境仍待核验');
+    if (b.freshness.status === 'stale' || nowMs - source > ageLimit * 1000 || nowMs - received > ageLimit * 1000) {
       return blank('stale', '快照已过期', '仅供回看，等待手动读取');
     }
     if (b.freshness.status !== 'recent') return blank('unknown', '数据待核验', '行情时效尚未得到确认');

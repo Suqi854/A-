@@ -15,7 +15,8 @@ function installMarketStatusCard() {
         || !Number.isFinite(ageLimit) || ageLimit <= 0) {
       return blank('unknown', '数据待核验', '来源或时间证据尚不完整');
     }
-    if (b.freshness.status === 'stale' || nowMs - received > ageLimit * 1000) {
+    if (b.freshness.status === 'latest_session' && nowMs - received <= ageLimit * 1000) return blank('latest_session', '最近时段快照', '非实时，环境仍待核验');
+    if (b.freshness.status === 'stale' || nowMs - source > ageLimit * 1000 || nowMs - received > ageLimit * 1000) {
       return blank('stale', '快照已过期', '仅供回看，等待手动读取');
     }
     if (b.freshness.status !== 'recent') return blank('unknown', '数据待核验', '行情时效尚未得到确认');
