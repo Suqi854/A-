@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; script-src 'self' file: 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' file: data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>市场状态卡片 · 第1项候选预览</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#f3f7fc;color:#152147;font:14px/1.6 "Microsoft YaHei","Segoe UI",sans-serif}
+    main{max-width:940px;margin:0 auto;padding:44px 32px 64px}.eyebrow{font-size:11px;letter-spacing:1.8px;color:#66839c;font-weight:700}
+    h1{font-size:27px;line-height:1.4;margin:9px 0 10px;letter-spacing:-.4px}.intro{margin:0 0 23px;color:#6c7b98}
+    .scope{display:inline-flex;padding:4px 10px;background:#e7effc;border:1px solid #d8e5f8;border-radius:5px;color:#2162b5;font-size:12px}
+    .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:25px 0 20px}select{max-width:100%;font:inherit;background:#fff;color:#19345d;border:1px solid #ccd9eb;border-radius:6px;padding:8px 12px}
+    .state-note{margin:0 0 14px;font-size:13px;color:#6c7d98}.state-note.testing{color:#9b570a;font-weight:700}
+    .comparison{display:grid;grid-template-columns:337px;gap:32px;background:linear-gradient(120deg,#eef6ff,#f8fbff);padding:25px 24px;border:1px solid #e0eaf8;border-radius:10px;overflow:auto}
+    .label{display:flex;justify-content:space-between;margin-bottom:11px;color:#576d8a;font-size:12px}.reference{display:block;width:337px;height:103px}
+    .size{color:#8493ae;font-size:11px}.metadata{margin-top:24px;background:#fff;border:1px solid #e1eaf7;border-radius:9px;padding:20px 24px}
+    .metadata h2{font-size:14px;margin:0 0 13px}.metadata dl{display:grid;grid-template-columns:104px 1fr;gap:8px;margin:0;font-size:13px}
+    dt{color:#8190a8}dd{margin:0;overflow-wrap:anywhere}.footnote{margin:18px 0 0;color:#7c8ba4;font-size:12px}
+    .boundary{margin:24px 0 0;padding-top:19px;border-top:1px solid #dce6f3;color:#7686a0;font-size:12px}.boundary p{margin:6px 0}
+    @media(max-width:820px){main{padding:28px 18px}.comparison{grid-template-columns:337px;gap:23px;padding:20px 16px}}
+    @media(max-width:400px){.comparison{grid-template-columns:minmax(0,1fr);padding:16px 8px}.reference{max-width:100%;height:auto}.metadata{padding:18px 14px}.metadata dl{grid-template-columns:80px 1fr}h1{font-size:23px}}
+  </style>
+</head>
+<body><main>
+  <div class="eyebrow">A QUANT / 01 · MARKET STATUS</div>
+  <h1>总览工作台 · 市场状态</h1>
+  <p class="intro">4.0第1项代码候选：仅显示市场状态卡片，尚未接入线上。</p>
+  <span class="scope">独立本地候选 · 尚未接入现有插件</span>
+  <div class="toolbar"><label for="scenario">查看状态</label><select id="scenario">
+    <option value="snapshot">未连接（默认）</option>
+    <option value="valid">测试夹具 · 有效行情</option>
+    <option value="unknown">测试夹具 · 证据未知</option>
+    <option value="stale">测试夹具 · 快照过期</option>
+    <option value="failed">测试夹具 · 读取失败</option>
+    <option value="disconnected">测试夹具 · 未连接</option>
+  </select></div>
+  <p id="state-note" class="state-note"></p>
+  <div class="comparison" id="comparison">
+    
+    <div><div class="label"><span id="candidate-label">候选 · 未连接</span><span class="size">337 × 103 px</span></div>
+      <aq-market-status-card id="market-card"></aq-market-status-card></div>
+  </div>
+  <section class="metadata" aria-labelledby="evidence-heading"><h2 id="evidence-heading">这张卡片的依据</h2><dl>
+    <dt>资料类型</dt><dd id="data-kind"></dd><dt>公开来源</dt><dd id="data-source"></dd>
+    <dt>源时间</dt><dd id="source-time"></dd><dt>服务读取</dt><dd id="received-time"></dd>
+    <dt>交易阶段</dt><dd id="phase"></dd><dt>环境判断</dt><dd>尚无可用的环境分类结果，保持待判定。</dd>
+  </dl><p class="footnote">源时间为提供方报告的更新时间，不等于经核实的最后成交时间；盘后量额终版未核定。</p></section>
+  <div class="boundary"><p>本预览不会连接行情接口，也不会自动刷新。当前不包含真实行情快照。</p>
+    <p>有效行情也不自动得到市场环境结论；测试夹具不是实际行情。</p>
+    <p>本次仅交付一张只读卡片。未发布、未启用后台或通知、未读取或修改账户。</p></div>
+</main>
+<script>
+(function (global) {
+  'use strict';
+  const blank = (status, value, note) => ({ status, value, note });
+  function viewOf(snapshot, nowMs) {
+    if (!snapshot) return blank('disconnected', '未连接', '等待手动读取行情');
+    if (snapshot.error) return blank('failed', '读取失败', '本次未取得有效行情');
+    const b = snapshot.benchmark, source = Date.parse(b?.source_timestamp), received = Date.parse(b?.received_at);
+    const ageLimit = b?.freshness?.threshold_seconds;
+    if (!b?.source || !Number.isFinite(source) || !Number.isFinite(received) || !Number.isFinite(nowMs)
+        || source > received + 5000 || received > nowMs + 5000
+        || !Number.isFinite(ageLimit) || ageLimit <= 0) {
+      return blank('unknown', '数据待核验', '来源或时间证据尚不完整');
+    }
+    if (b.freshness.status === 'stale' || nowMs - received > ageLimit * 1000) {
+      return blank('stale', '快照已过期', '仅供回看，等待手动读取');
+    }
+    if (b.freshness.status !== 'recent') return blank('unknown', '数据待核验', '行情时效尚未得到确认');
+    return blank('valid', '待判定', '行情已读，环境仍待核验');
+  }
+  class MarketStatusCard extends HTMLElement {
+    constructor() {
+      super();
+      const root = this.attachShadow({ mode: 'open' });
+      root.innerHTML = `<style>
+        :host{display:block;width:337px;max-width:100%;height:103px;isolation:isolate}
+        .card,.card *{box-sizing:border-box}
+        .card{height:103px;display:flex;align-items:flex-start;gap:22px;padding:13px 14px;
+          background:linear-gradient(110deg,#fff 0%,#fff 65%,#fcfdff 100%);border:1px solid #e8eff8;
+          border-radius:7px;color:#080f43;font-family:"Microsoft YaHei","Segoe UI",sans-serif;text-align:left}
+        .icon{width:48px;height:48px;flex:0 0 48px;border-radius:7px;
+          background:linear-gradient(145deg,#fff5f4,#fff0f1);box-shadow:inset 0 -1px 0 #ffd1d7}
+        svg{width:48px;height:48px;display:block}
+        .copy{min-width:0;padding-top:0}
+        h3{font-size:16px;font-weight:700;line-height:21px;margin:0;white-space:nowrap;transform:translateY(-2px)}
+        strong{display:block;color:#ff151e;font-size:24px;font-weight:700;line-height:32px;white-space:nowrap}
+        p{font-size:15px;font-weight:600;line-height:22px;margin:4px 0 0;color:#8993b7;white-space:nowrap}
+        @media(max-width:340px){.card{gap:14px;padding-left:12px;padding-right:8px}p{font-size:13px}}
+      </style><section class="card" aria-label="市场状态"><span class="icon" aria-hidden="true">
+        <svg viewBox="0 0 48 48" fill="none"><path d="M10 31 20 21 27 27 38 14M30 14h8v8"
+          stroke="#ff1720" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span><div class="copy"><h3>市场状态</h3><strong role="status"></strong><p></p></div></section>`;
+      this.setSnapshot(null);
+    }
+    setSnapshot(snapshot, { nowMs = Date.now(), fixture = false } = {}) {
+      this.view = viewOf(snapshot, nowMs);
+      this.dataset.status = this.view.status;
+      this.dataset.fixture = String(fixture);
+      this.shadowRoot.querySelector('h3').textContent = fixture ? '市场状态 · 测试' : '市场状态';
+      this.shadowRoot.querySelector('strong').textContent = this.view.value;
+      this.shadowRoot.querySelector('p').textContent = this.view.note;
+      this.shadowRoot.querySelector('section').setAttribute('aria-label', fixture ? '市场状态，测试夹具' : '市场状态');
+      return this.view;
+    }
+  }
+  MarketStatusCard.viewOf = viewOf;
+  global.AqMarketStatusCard = MarketStatusCard;
+  if (!customElements.get('aq-market-status-card')) customElements.define('aq-market-status-card', MarketStatusCard);
+})(globalThis);
+
+</script>
+<script>
+  'use strict';
+  const frozenNow = Date.parse('2026-01-05T10:00:00+08:00');
+  const example = {phase:'regular_continuous',benchmark:{symbol:'TEST_INDEX',name:'合成测试指数',source:'测试夹具',
+    source_timestamp:'2026-01-05T09:59:40+08:00',received_at:'2026-01-05T09:59:45+08:00',freshness:{status:'recent',threshold_seconds:90}}};
+  const fixtures = {valid:example,unknown:{...example,benchmark:{...example.benchmark,source_timestamp:null}},
+    stale:{...example,benchmark:{...example.benchmark,received_at:'2026-01-05T09:55:00+08:00',source_timestamp:'2026-01-05T09:54:40+08:00',freshness:{status:'stale',threshold_seconds:90}}},
+    failed:{error:'SYNTHETIC_SOURCE_FAILURE'},disconnected:null};
+  const phases = {after_close:'盘后（按已核日历阶段）',regular_continuous:'连续竞价（测试）',unknown:'未知'};
+  const text = (id,value) => {document.getElementById(id).textContent = value || '未取得';};
+  const clock = value => Number.isFinite(Date.parse(value)) ? new Date(value).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false})+'（北京时间）' : '未取得';
+  function showState() {
+    const selected=document.getElementById('scenario').value, testing=selected!=='snapshot';
+    const data=testing?fixtures[selected]:null;
+    const view=document.getElementById('market-card').setSnapshot(data,{fixture:testing,nowMs:testing?frozenNow:Date.now()});
+    const note=document.getElementById('state-note');note.className='state-note'+(testing?' testing':'');
+    note.textContent=testing?'测试模式 · 使用合成资料与固定测试时钟，不代表实际行情。':'未连接任何行情接口 · 仅展示候选组件与显式测试状态。';
+    text('candidate-label',testing?'候选 · 测试夹具':'候选 · 未连接');
+    text('data-kind',testing?'合成测试夹具（非实际行情）':'未连接任何行情接口');
+    text('data-source',data?.benchmark?data.benchmark.source+' / '+data.benchmark.name:'未取得');
+    text('source-time',clock(data?.benchmark?.source_timestamp));text('received-time',clock(data?.benchmark?.received_at));
+    text('phase',phases[data?.phase]||'未知');
+  }
+  document.getElementById('scenario').addEventListener('change',showState);showState();
+</script>
+</body></html>
