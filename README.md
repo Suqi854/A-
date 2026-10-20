@@ -4,5 +4,6 @@
 
 - candidates/v4-item-01-market-status/：市场状态卡片与独立离线预览。
 - integrations/v97-item-01-market-status/：现有页面的最小接入脚本、组件及测试。目录名是兼容性标识，不表示运行环境状态。
+- components/stock-research-ui/：诊断展示与历史研究图层适配器、滚动价格参考、行情抓取偏好及独立合成测试。计算引擎与数据源由调用方提供。
 
 版本说明仅描述代码行为。代码提交不代表生产部署或用户验收。
