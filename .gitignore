@@ -1,0 +1,6 @@
+node_modules/
+codex-install-test/
+test-results/
+*.log
+.env
+.env.*
