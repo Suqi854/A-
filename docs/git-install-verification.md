@@ -40,6 +40,20 @@
    成功返回服务元数据和工具列表；再用一个明确股票代码调用一次 `get_quotes`，
    成功返回一条报价，时效标记为 `latest_session`。没有把该快照当作实时行情。
    只保留成功、条数与时效结论；不将原始响应、价格、账户或诊断明细写入仓库。
+6. 上传后使用第二个全新隔离 `CODEX_HOME`，实际从 GitHub 拉取：
+
+   ```powershell
+   codex plugin marketplace add https://github.com/Suqi854/A-.git --ref codex/fix-git-plugin-install-20261021 --json
+   codex plugin add ashare-live-quotes@ashare-quotes --json
+   codex plugin list --marketplace ashare-quotes --json
+   ```
+
+   三步均成功。返回 marketplace 名 `ashare-quotes`，版本 `0.1.0`，
+   `installed:true`、`enabled:true`、`marketplaceSource.sourceType:git`。
+   Git 检出 HEAD 为 `5a929c3df3254b54d4f94c4b4395cbd3d064012a`。
+   对 Git 检出的包再次执行实际 `plugin/read` 与 `skills/list`，正确加载插件呈现信息和连接技能。
+   编写目录、Git 检出和安装缓存的四个包内文件逐一比较，统一换行后的 UTF-8 内容完全一致；
+   Windows Git 检出将 LF 转为 CRLF，无其他内容差异。
 
 ## 验证边界与待完成项
 
@@ -51,7 +65,6 @@
 然后调用一次诊断来闭环。其他账户没有原私有 App 的访问权限时，安装此包仍不能使用行情。
 本任务不申请额外账户权限，不复制凭据，也不改变 App 公开范围。
 
-Git 来源的实际拉取、安装结果将在上传分支后追加到本记录。
 未验收 ChatGPT 管理界面的 Git 导入，未修改当前用户的客户端全局配置。
 默认分支保持原样；无分支选择的安装入口仍需另行授权合并修复后才能直接使用仓库 URL。
 
