@@ -1,6 +1,6 @@
 {
   "name": "ashare-live-quotes",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "连接已有 A股实时行情 App，读取报价、K线和行情诊断。需要该 App 的访问权限。",
   "author": { "name": "Suqi854" },
   "apps": "./.app.json",

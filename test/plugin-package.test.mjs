@@ -16,30 +16,31 @@ test('catalog resolves to a contained, existing package from the repository root
     assert.match(entry.source.path, /^\.\//);
     const target = resolve(root, entry.source.path);
     assert(!relative(root, target).startsWith(`..${sep}`));
-    assert(existsSync(resolve(target, 'plugin.json')));
+    // A root Agent Plugins manifest takes precedence over the native manifest.
+    // Codex 0.163.0 deliberately ignores its app declarations, including overlays.
+    assert(!existsSync(resolve(target, 'plugin.json')));
     assert(existsSync(resolve(target, '.codex-plugin/plugin.json')));
-    assert.equal(entry.name, JSON.parse(readFileSync(resolve(target, 'plugin.json'), 'utf8')).name);
+    assert.equal(entry.name, JSON.parse(readFileSync(resolve(target, '.codex-plugin/plugin.json'), 'utf8')).name);
     assert.equal(entry.policy.authentication, 'ON_INSTALL');
     assert(!Object.hasOwn(entry, 'pluginId'));
   }
 });
 
-test('portable and compatibility manifests agree and resolve a required app dependency', () => {
+test('native manifest preserves the required app without an inactive portable overlay', () => {
   const base = 'plugins/ashare-live-quotes/';
-  const portable = json(base + 'plugin.json');
-  const compatibility = json(base + '.codex-plugin/plugin.json');
-  const openai = portable.extensions['com.openai'];
-  for (const key of ['name', 'version', 'description', 'author']) assert.deepEqual(portable[key], compatibility[key]);
-  assert.deepEqual(openai.interface, compatibility.interface);
-  assert([...openai.interface.shortDescription].length <= 30);
-  assert.equal(openai.apps, './.app.json');
-  assert.equal(compatibility.apps, openai.apps);
-  const apps = json(base + openai.apps).apps;
+  const manifest = json(base + '.codex-plugin/plugin.json');
+  assert.equal(manifest.name, 'ashare-live-quotes');
+  assert.match(manifest.version, /^\d+\.\d+\.\d+$/);
+  assert([...manifest.interface.shortDescription].length <= 30);
+  assert(Array.isArray(manifest.interface.capabilities));
+  assert.equal(manifest.apps, './.app.json');
+  assert.equal(manifest.skills, './skills/');
+  const apps = json(base + manifest.apps).apps;
   assert.equal(Object.keys(apps).length, 1);
   const app = Object.values(apps)[0];
-  assert.match(app.id, /^asdk_app_[a-z0-9_]+$/);
+  assert.equal(app.id, 'asdk_app_sites_b91a56bbcc40819181d197752bd6b91f');
   assert.equal(app.required, true);
-  assert(!Object.hasOwn(portable, 'apps'));
+  assert(!existsSync(resolve(root, base, 'plugin.json')));
   assert(!existsSync(resolve(root, base, 'mcp.json')));
   assert(!existsSync(resolve(root, base, '.mcp.json')));
 });
@@ -55,7 +56,7 @@ test('package has one discoverable reading skill and no executable or private pa
     }
   }
   walk(base);
-  assert.deepEqual(files.sort(), ['.app.json', '.codex-plugin/plugin.json', 'plugin.json', 'skills/ashare-quotes-connection/SKILL.md'].sort());
+  assert.deepEqual(files.sort(), ['.app.json', '.codex-plugin/plugin.json', 'skills/ashare-quotes-connection/SKILL.md'].sort());
   const skill = readFileSync(resolve(base, 'skills/ashare-quotes-connection/SKILL.md'), 'utf8');
   assert.match(skill, /^---\r?\nname: ashare-quotes-connection\r?\ndescription: .+\r?\n---/);
   assert.match(skill, /probe:false/);
