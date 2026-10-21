@@ -1,0 +1,8 @@
+{
+  "apps": {
+    "ashare-live-quotes": {
+      "id": "asdk_app_sites_b91a56bbcc40819181d197752bd6b91f",
+      "required": true
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "ashare-quotes",
+  "interface": { "displayName": "A股行情" },
+  "plugins": [
+    {
+      "name": "ashare-live-quotes",
+      "source": { "source": "local", "path": "./plugins/ashare-live-quotes" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Finance"
+    }
+  ]
+}
