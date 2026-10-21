@@ -53,13 +53,13 @@ codex plugin add ashare-live-quotes@ashare-quotes
 ```text
 .agents/plugins/marketplace.json
 plugins/ashare-live-quotes/
-  plugin.json
   .codex-plugin/plugin.json
   .app.json
   skills/ashare-quotes-connection/SKILL.md
 ```
 
-`source.path` 相对仓库根目录解析。便携清单和 Codex 兼容清单引用同一份 `.app.json`。
+`source.path` 相对仓库根目录解析。Codex 原生清单引用包根目录的 `.app.json`。
+本 App 连接包不同时放置根 `plugin.json`，原因与验证边界见 [依赖兼容记录](docs/native-app-dependency-compatibility.md)。
 App ID 是连接标识，不是凭据；服务端认证及原 App 的访问范围仍然有效。
 本包不需要 npm 安装、构建、服务进程、开机启动或运行目录外的文件。
 网页组件候选仍在原 Draft PR #1，与本连接包分开审阅。
