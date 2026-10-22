@@ -24,6 +24,13 @@ test('catalog resolves to a contained, existing package from the repository root
   }
 });
 
+test('Claude marketplace points to the same contained package', () => {
+  const m = json('.claude-plugin/marketplace.json');
+  assert.equal(m.plugins.length, 1);
+  assert.equal(m.plugins[0].name, 'ashare-live-quotes');
+  assert(existsSync(resolve(root, m.plugins[0].source, '.claude-plugin/plugin.json')));
+});
+
 test('portable and compatibility manifests agree and resolve a required app dependency', () => {
   const base = 'plugins/ashare-live-quotes/';
   const portable = json(base + 'plugin.json');
@@ -44,7 +51,7 @@ test('portable and compatibility manifests agree and resolve a required app depe
   assert(!existsSync(resolve(root, base, '.mcp.json')));
 });
 
-test('package has one discoverable reading skill and no executable or private payload', () => {
+test('package has two reading skills, one stdlib quote script and no private payload', () => {
   const base = resolve(root, 'plugins/ashare-live-quotes');
   const files = [];
   function walk(dir) {
@@ -55,7 +62,15 @@ test('package has one discoverable reading skill and no executable or private pa
     }
   }
   walk(base);
-  assert.deepEqual(files.sort(), ['.app.json', '.codex-plugin/plugin.json', 'plugin.json', 'skills/ashare-quotes-connection/SKILL.md'].sort());
+  assert.deepEqual(files.sort(), ['.app.json', '.claude-plugin/plugin.json', '.codex-plugin/plugin.json', 'plugin.json',
+    'skills/ashare-quotes-connection/SKILL.md', 'skills/ashare-public-quotes/SKILL.md',
+    'skills/ashare-public-quotes/scripts/quote.py'].sort());
+  const claude = JSON.parse(readFileSync(resolve(base, '.claude-plugin/plugin.json'), 'utf8'));
+  const portable = JSON.parse(readFileSync(resolve(base, 'plugin.json'), 'utf8'));
+  assert.equal(claude.name, portable.name);
+  assert.equal(claude.version, portable.version);
+  const pub = readFileSync(resolve(base, 'skills/ashare-public-quotes/SKILL.md'), 'utf8');
+  assert.match(pub, /^---\r?\nname: ashare-public-quotes\r?\ndescription: .+\r?\n---/);
   const skill = readFileSync(resolve(base, 'skills/ashare-quotes-connection/SKILL.md'), 'utf8');
   assert.match(skill, /^---\r?\nname: ashare-quotes-connection\r?\ndescription: .+\r?\n---/);
   assert.match(skill, /probe:false/);

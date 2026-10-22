@@ -1,0 +1,18 @@
+{
+  "name": "ashare-quotes",
+  "owner": {
+    "name": "Suqi854"
+  },
+  "metadata": {
+    "description": "A股行情插件（Claude Code / Codex 通用）"
+  },
+  "plugins": [
+    {
+      "name": "ashare-live-quotes",
+      "source": "./plugins/ashare-live-quotes",
+      "description": "A股公开行情：报价、指数外围、K线、分时、主力资金",
+      "version": "0.2.0",
+      "category": "finance"
+    }
+  ]
+}

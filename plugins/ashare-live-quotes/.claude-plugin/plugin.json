@@ -1,0 +1,10 @@
+{
+  "name": "ashare-live-quotes",
+  "version": "0.2.0",
+  "description": "A股行情：公开行情接口（腾讯/东财，任何客户端可用，含 Python 脚本）+ 已有A股实时行情App连接（ChatGPT/Codex，需访问权限）。读取报价、指数外围、K线、分时与主力资金。",
+  "author": {
+    "name": "Suqi854"
+  },
+  "homepage": "https://github.com/Suqi854/A-",
+  "repository": "https://github.com/Suqi854/A-"
+}

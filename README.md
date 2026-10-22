@@ -1,4 +1,40 @@
-# A股行情 Git 连接包
+# A股行情插件（Claude Code / Codex 通用）
+
+插件包含两种读取行情的方式：
+
+| 技能 | 方式 | 适用 |
+|---|---|---|
+| `ashare-public-quotes` | 腾讯财经和东方财富的公开接口；自带只用标准库的 `quote.py`，覆盖报价、指数外围、日K、分时、主力资金 | 任何客户端：Claude Code、Codex、能运行 Python 或抓取网页的环境 |
+| `ashare-quotes-connection` | 连接已有的「A股实时行情 App」 | 只适用于 ChatGPT / Codex，并且需要该 App 的访问权限 |
+
+## 安装
+
+**Claude Code**
+
+```
+/plugin marketplace add Suqi854/A-
+/plugin install ashare-live-quotes@ashare-quotes
+```
+
+**Codex**
+
+```
+codex plugin marketplace add Suqi854/A-
+codex plugin add ashare-live-quotes@ashare-quotes
+```
+
+**直接用脚本**
+
+```
+python plugins/ashare-live-quotes/skills/ashare-public-quotes/scripts/quote.py quote 600519
+```
+
+多因子评分、交易计划、自动选股、模拟盘等功能，在分析插件 [Suqi854/-A](https://github.com/Suqi854/-A) 里。
+
+---
+
+## 历史说明：ChatGPT App 连接包
+
 
 本仓库提供可由 Codex / ChatGPT 支持的 Git marketplace 安装的行情连接包。
 行情仍由已有的 **A股实时行情 App** 提供；安装者需要该 App 的访问权限并完成连接。
